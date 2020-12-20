@@ -15,7 +15,7 @@ class Indicators:
 
         self.data = web.DataReader(x, 'yahoo', self.start, self.end)
 
-        print(self.data)
+        #print(self.data)
 
 
     def VOL(self):
@@ -93,68 +93,71 @@ class Indicators:
         return BB_upper, BB_lower
 
 
-    def Long(self):
+    def Action(self):
+
+        LongNum = 0
+        ShortNum = 0
+        ExitNum = 0
+
+        MaxDataNum = 400
 
         CloseData = self.data['Adj Close']
 
-        LongLst = []
+        Actionlst = []
 
-        for i in range(len(CloseData)):
+        for i in range(100):
+            Actionlst.append(np.nan)
 
-            if i != len(CloseData) - 1:
+        #print(len(Actionlst))
 
-                if CloseData[i + 1] > (CloseData[i] + self.buffer):
-                    LongLst.append(1)
+        for i in range(len(CloseData) - 100):
 
-                else:
-                    LongLst.append(0)
+            if i + 100 != len(CloseData) - 1:
+                
+                
+                if CloseData[i + 1 + 100] > (CloseData[i + 100] + self.buffer): #long
 
-        LongLst.append(0)
+                    if LongNum != MaxDataNum:
 
-        return LongLst
+                        Actionlst.append(1)
+                        LongNum = LongNum + 1
 
+                    else:
+                        Actionlst.append(np.nan)
 
-    def Short(self):
+                
+                if CloseData[i + 1 + 100] < (CloseData[i + 100] - self.buffer): #Short
 
-        CloseData = self.data['Adj Close']
+                    if ShortNum != MaxDataNum:
 
-        ShortLst = []
-
-        for i in range(len(CloseData)):
-
-            if i != len(CloseData) - 1:
-
-                if CloseData[i + 1] < (CloseData[i] - self.buffer):
-                    ShortLst.append(1)
-
-                else:
-                    ShortLst.append(0)
-
-        ShortLst.append(0)
-
-        return ShortLst
-    
-
-    def Exit(self):
-
-        CloseData = self.data['Adj Close']
-
-        ExitLst = []
-
-        for i in range(len(CloseData)):
-
-            if i != len(CloseData) - 1:
-
-                if CloseData[i + 1] < (CloseData[i] + 0.75) and CloseData[i + 1] > (CloseData[i] - 0.75):
-                    ExitLst.append(1)
-
-                else:
-                    ExitLst.append(0)
-
-        ExitLst.append(0)
+                        Actionlst.append(2)
+                        ShortNum = ShortNum + 1
                     
+                    else:
+                        Actionlst.append(np.nan)
 
-        return ExitLst
+
+                
+                if CloseData[i + 1 + 100] < (CloseData[i + 100] + self.buffer) and CloseData[i + 1 + 100] > (CloseData[i + 100] - self.buffer): #Exit
+
+                    if ExitNum != MaxDataNum:
+
+                        Actionlst.append(3)
+                        ExitNum = ExitNum + 1
+                    
+                    else:
+                        Actionlst.append(np.nan)
+
+
+        print(ExitNum)
+        print(ShortNum)
+        print(LongNum)
+
+        print(Actionlst)
+
+        Actionlst.append(np.nan)
+
+        return Actionlst
 
 
     def DataIn(self):
@@ -199,13 +202,22 @@ output = pd.concat([RSI, MACD, SMA_5, SMA_10, SMA_50, SMA_100, BB_lower, BB_uppe
 output.columns = ['RSI', 'MACD', 'SMA_5', 'SMA_10', 'SMA_50', 'SMA_100', 'BB_lower', 'BB_upper', 'Open', 'Close', 'Volume']
 
 
-output['Exit'] = SPY.Exit()
-output['Long'] = SPY.Long()
-output['Short'] = SPY.Short()
+output['Action'] = SPY.Action()
+
+ActionLst = SPY.Action()
+
+print(ActionLst.count(2))
+print(ActionLst.count(1))
+print(ActionLst.count(3))
+
 output['Running'] = SPY.DataIn()
 
+output = output.dropna()
 
-#plt.plot(output.tail(50))
-plt.show
+output = output.sample(frac = 1)
+
+print(output.tail(10))
+
 
 output.to_csv()
+
