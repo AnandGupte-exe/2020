@@ -1,0 +1,163 @@
+import pandas as pd
+import math as m
+import time as time
+import numpy
+
+GameRunning = True
+global ObjectDF
+
+ObjectDF = pd.DataFrame({
+                    'TankFactory':[],
+                    'GoldMine':[],
+                    'StickMenFactory':[],
+                    'Tank':[],
+                    'StickMen':[]
+                  })
+
+global Total_Cash
+Total_Cash = 900
+
+
+NewQuantityOfObjects = pd.Series([0, 1, 0, 0, 0], index= ['TankFactory', 'GoldMine', 'StickMenFactory', 'Tank', 'StickMen'])
+ObjectDF = ObjectDF.append(NewQuantityOfObjects, ignore_index=True)
+
+Health = 100
+
+def TankFactory(ObjectDF,Total_Cash,Tank_Quantity): 
+
+  DailyCost = 100
+
+  x = 0
+
+  if DailyCost > Total_Cash:
+
+    x = TankFactory_Quantity - 1
+
+    print("you lost 1 Tank Factory")
+
+  else:
+
+    Total_Cash = Total_Cash - DailyCost
+
+    y = Tank_Quantity + 1
+
+  return Total_Cash, x, y
+
+
+def StickMenFactory(ObjectDF,Total_Cash): 
+
+  DailyCost = 50
+
+  x = 0
+
+  if DailyCost > Total_Cash:
+
+    x = StickFactory_Quantity - 1
+
+    print("you lost 1 Tank Factory")
+
+  else:
+
+    Total_Cash = Total_Cash - DailyCost
+
+    y = StickMen_Quantity + 1
+
+  return Total_Cash, x, y
+
+
+def GoldMine(ObjectDF, Total_Cash):
+
+  DailyReturn = 100
+
+  Total_Cash = Total_Cash + DailyReturn
+
+  return Total_Cash
+
+
+while GameRunning == True:
+  
+  TankFactory_Quantity_nonINT = ObjectDF.tail(1)['TankFactory']
+  TankFactory_Quantity = int(TankFactory_Quantity_nonINT.to_numpy())
+
+  StickMenFactory_Quantity_nonINT = ObjectDF.tail(1)['StickMenFactory']
+  StickMenFactory_Quantity = int(StickMenFactory_Quantity_nonINT.to_numpy())
+
+  GoldMine_Quantity_nonINT = ObjectDF.tail(1)['GoldMine']
+  GoldMine_Quantity = int(GoldMine_Quantity_nonINT.to_numpy())
+
+  StickMen_Quantity_nonINT = ObjectDF.tail(1)['StickMen']
+  StickMen_Quantity = int(StickMen_Quantity_nonINT.to_numpy())
+
+  Tank_Quantity_nonINT = ObjectDF.tail(1)['Tank']
+  Tank_Quantity = int(Tank_Quantity_nonINT.to_numpy())
+
+
+  for i in range(GoldMine_Quantity):
+
+    Total_Cash = GoldMine(ObjectDF, Total_Cash)
+
+  for i in range(TankFactory_Quantity):
+
+    Total_Cash = TankFactory(ObjectDF, Total_Cash, Tank_Quantity)[0]
+
+    NewQuantityOfObjects = pd.Series([TankFactory(ObjectDF, Total_Cash, Tank_Quantity)[1], GoldMine_Quantity, StickMenFactory_Quantity, TankFactory(ObjectDF, Total_Cash, Tank_Quantity)[2], StickMen_Quantity], index= ['TankFactory', 'GoldMine', 'StickMenFactory', 'Tank', 'StickMen'])
+    ObjectDF = ObjectDF.append(NewQuantityOfObjects, ignore_index=True)
+
+
+  for i in range(StickMenFactory_Quantity):
+
+    Total_Cash = StickMenFactory(ObjectDF, Total_Cash)[0]
+
+    NewQuantityOfObjects = pd.Series(TankFactory_Quantity, GoldMine_Quantity, StickMenFactory(ObjectDF, Total_Cash)[1], Tank_Quantity, StickMenFactory(ObjectDF, Total_Cash)[2], index= ['TankFactory', 'GoldMine', 'StickMenFactory', 'Tank', 'StickMen'])
+    ObjectDF = ObjectDF.append(NewQuantityOfObjects, ignore_index=True)
+
+  
+
+  print("--------------------------------------------------------------------------")
+
+  print("Cash Balance:" + str(Total_Cash) + "                    currently owned:")
+  print("GoldMine = $700" + "                     " + str(GoldMine_Quantity) + " Gold Mines")
+  print("Tank Factory = $500" + "                 " + str(TankFactory_Quantity) + " Tank Factories")
+  print("Health: " + str(Health) + "                         " + str(TankFactory_Quantity) + " Tanks")
+  print("                                    " + str(StickMenFactory_Quantity) + " StickMen Factories")
+  print("                                    " + str(StickMen_Quantity) + " StickMen")
+  print("--------------------------------------------------------------------------")
+
+  print("What do you want to buy?")
+
+  a = str(input())
+
+
+  if a == 'Gold Mine' or a == 'GoldMine' or a == 'gold mine':
+    
+    if Total_Cash == 700 or Total_Cash > 700:
+
+      x = GoldMine_Quantity + 1
+
+      Total_Cash = Total_Cash - 700
+
+      NewQuantityOfObjects = pd.Series([TankFactory_Quantity, x, StickMenFactory_Quantity, Tank_Quantity, StickMen_Quantity], index= ['TankFactory', 'GoldMine', 'StickMenFactory', 'Tank', 'StickMen'])
+      ObjectDF = ObjectDF.append(NewQuantityOfObjects, ignore_index=True)
+
+      print("Pruchase Sucsessful")
+    
+    else:
+
+      print("insuffisiant funds")
+
+  elif a == 'Tank Factory' or a == 'TankFactory' or a == 'tank factory':
+    
+      if Total_Cash == 500 or Total_Cash > 500:
+
+        x = TankFactory_Quantity + 1
+
+        Total_Cash = Total_Cash - 500
+
+        NewQuantityOfObjects = pd.Series([x, GoldMine_Quantity, StickMenFactory_Quantity, Tank_Quantity, StickMen_Quantity], index= ['TankFactory', 'GoldMine', 'StickMenFactory', 'Tank', 'StickMen'])
+        ObjectDF = ObjectDF.append(NewQuantityOfObjects, ignore_index=True) 
+
+        print("Pruchase Sucsessful")
+      
+      else:
+
+        print("insuffisiant funds")
