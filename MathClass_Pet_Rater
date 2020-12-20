@@ -1,0 +1,175 @@
+#@title PetPicker2000
+
+import numpy as np
+import math as math
+import time as t
+
+
+Init_data = [[1500, 120, 13, 3, 75, 50, 60, 1000],
+             [900, 60, 16, 2, 50, 25, 35, 500],
+             [25, 15, 10, 0, 5, 0.5, 2, 5],
+             [30, 15, 15, 1, 20, 0.2, 7, 1.5],
+             [100, 5, 25, 0, 10, 20, 3, 2.5],
+             [20, 10, 3, 2, 10, 0.4, 7, 2],
+             [225, 20, 6, 2, 40, 2, 9, 7.5],
+             [400, 60, 6.5, 3, 50, 6.5, 16, 15],
+             [220, 45, 2, 2, 50, 0.75, 10, 4],
+             [130, 30, 17.5, 3, 20, 0.7, 10, 2],
+             [250, 60, 15, 0, 5, 0.06, 3, 2],
+             [50, 22.5, 75, 2, 35, 15, 7, 4]
+            ]
+
+
+
+def get_user_data():
+
+    output = []
+
+    print("1)What is your ideal pets inital cost?")
+    output.append(float(input()))
+
+    print("2)How much time per day do you want to spend maintaning the pet?")
+    output.append(float(input()))
+
+    print("3)What is your ideal pets lifespan?")
+    output.append(float(input()))
+
+    print("4)How trainable do you want your pet to be? (0 = not trainable, 1 = hard, 2 = medium, 3 = easy)")
+    output.append(float(input()))
+
+    print("5)What is your ideal pets monthly cost?")
+    output.append(float(input()))
+
+    print("6)What is your ideal pets weight?")
+    output.append(float(input()))
+
+    print("7)What is your ideal pets lenght")
+    output.append(float(input()))
+
+    print("8)How much space will your pet have accses to? (square feet)")
+    output.append(float(input()))
+
+    return output
+
+
+
+def scale__inti__Data(x):
+
+    Tinput = np.transpose(x)
+    maxData = []
+
+    output = []
+
+    for i in range(len(Tinput)):
+
+        maxData.append(float(max(Tinput[i])))
+
+    for a in range(len(Tinput)):
+
+        buffer = []
+
+        for b in range(len(Tinput[0])):
+
+            buffer.append(Tinput[a][b] / maxData[a])
+
+        output.append(buffer)
+
+    output = np.transpose(output)
+
+    return output, maxData
+
+
+
+def scale__user__Data(x, y):
+
+    output = []
+
+    for i in range(len(y)):
+
+        output.append(y[i] / x[i])
+
+    return output
+
+
+
+def find_Score(x,y):
+
+
+    local_output = []
+    total_output = []
+
+    for a in range(len(y)):
+
+        buffer = []
+
+        for b in range(len(x)):
+
+            buffer.append(abs(x[b] - y[a][b]))
+
+        local_output.append(buffer)
+
+    for a in range(len(local_output)):
+        total_output.append(sum(local_output[a]))
+
+    return total_output
+
+
+
+def findPet(x):
+
+    indexlst = ['dog',
+                'cat',
+                'fish',
+                'gecko',
+                'snake',
+                'hamster',
+                'pair of guinea pigs',
+                'indoor rabits',
+                'pair of rats',
+                'parakeet',
+                'frog',
+                'tortouise']
+
+
+    min_index = x.index(min(x))
+
+    output = indexlst[min_index]
+
+    return output
+
+
+
+user_data = get_user_data()
+
+print(user_data)
+
+t.sleep(0.3)
+
+Scaled_Init_data = scale__inti__Data(Init_data)[0]
+
+Scaled_User_data = scale__user__Data( scale__inti__Data(Init_data)[1], user_data)
+
+Score = find_Score(Scaled_User_data, Scaled_Init_data)
+
+print(Scaled_Init_data)
+
+t.sleep(0.2)
+
+print(Scaled_User_data)
+
+t.sleep(0.2)
+
+print(Score)
+
+t.sleep(0.4)
+
+Final_Pet = findPet(Score)
+
+print("-------------------------------------------------")
+print("-------------------------------------------------")
+print("-------------------------------------------------")
+print("The best pet for you is:")
+
+t.sleep(0.3)
+
+print(Final_Pet)
