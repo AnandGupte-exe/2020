@@ -1,0 +1,151 @@
+import pandas as pd
+
+class UncoupledTachyonRadiator(QCAlgorithm):
+
+    def Initialize(self):
+        
+        #set Backtesting dates
+        
+        
+        self.SetStartDate(2020, 11, 10)
+        self.SetEndDate(2020, 11, 11)
+        
+        # Set Strategy Cash
+        self.SetCash(1000000)
+        
+        #define which ticker trading
+        self.symbol = self.AddEquity("SPY", Resolution.Minute).Symbol
+        
+        StartData = []
+
+        self.df = pd.DataFrame(StartData, columns =[
+                                'Time',
+                                'Current_Price', 
+                                'SMA', 
+                                'FIFTN_Current_Close', 
+                                'FIFTN_Current_Open', 
+                                'FIFTN_Previous_Close', 
+                                'FIFTN_Previous_Open', 
+                                'Stop_Loss', 
+                                'Limit_Price', 
+                                'Trading Time'
+                                        ])
+        
+        
+        #generate 15 min Bar
+        self.window = RollingWindow[TradeBar](2)
+        self.Consolidate(self.symbol, timedelta(minutes=15), lambda x: self.window.Add(x))
+        
+        #schduling sell
+        self.Schedule.On(self.DateRules.EveryDay(), self.TimeRules.Every(timedelta(minutes=15)), self.LiquidatStuff)
+        
+        
+        #30 min after open
+        self.Schedule.On(self.DateRules.EveryDay(), self.TimeRules.AfterMarketOpen(self.symbol, 15), self.AfterOpen)
+        
+        #30 min before close
+        self.Schedule.On(self.DateRules.EveryDay(), self.TimeRules.BeforeMarketClose(self.symbol, 15), self.BeforeClose)
+        
+        
+        
+    def AfterOpen(self):
+        self.df = self.df.append({'Trading Time': True}, ignore_index=True)
+        
+    def BeforeClose(self):
+        self.df = self.df.append({'Trading Time': False}, ignore_index=True)
+        
+    
+    
+    def LiquidatStuff(self):
+        
+        if self.Portfolio.Invested:
+            
+            #liquidate everything
+            self.Liquidate(self.symbol)
+        
+    
+    def OnData(self, data):
+        
+        TradingTime = self.df.tail(0)
+        
+        TradingTime = TradingTime["Trading Time"]
+        
+        TradingTime = TradingTime.to_numpy()
+        
+        
+        if (TradingTime == True):
+        
+            #checking if the trade bar is ready
+            if self.window.IsReady:
+        
+                #saving 1min data
+                HistDF = self.History(self.symbol, timedelta(minutes=1), Resolution.Minute)
+            
+            
+                HistDF = HistDF['close'].unstack(level=0)
+        
+            
+                Current_Price = HistDF.to_numpy()
+            
+                self.Log(Current_Price)
+            
+                self.df = self.df.append({'Current_Price': Current_Price}, ignore_index=True)
+                
+                #saving Current close data to df
+                Current_Close = self.window[0].Close
+                self.df = self.df.append({'FIFTN_Current_Close': Current_Close}, ignore_index=True)
+                
+                #saving current open data to df
+                Current_Open = self.window[0].Open
+                self.df = self.df.append({'FIFTN_Current_Open': Current_Open}, ignore_index=True)
+                
+                #saving previous close to df
+                Previous_Close = self.window[1].Close
+                self.df = self.df.append({'FIFTN_Previous_Close': Previous_Close}, ignore_index=True)
+                
+                #saving previous open to df
+                Previous_Open = self.window[1].Open
+                self.df = self.df.append({'FIFTN_Previous_Open': Previous_Open}, ignore_index=True)
+                
+                #saving sma to df
+                SMA = self.SMA(self.symbol, 14, Resolution.Daily)
+                self.df = self.df.append({'SMA': SMA}, ignore_index=True)
+            
+                #saving stop loss
+                StopLoss = Current_Close - 0.01
+                self.df = self.df.append({'Stop_Loss': StopLoss}, ignore_index=True)
+            
+                #saving limit price
+                Limit_Price = Current_Open
+                self.df = self.df.append({'Limit_Price': Limit_Price}, ignore_index=True)
+            
+            
+            
+            #short?
+            if not self.Portfolio.Invested:
+                
+                if Previous_Close < Previous_Open:
+                    
+                    if Current_Close > Current_Open:
+                       
+                        if (Previous_Open - Previous_Close) > ((Current_Close - Current_Open) * 1.5):
+                           
+                            if (Current_Open - Current_Close) > 0.1:
+                               
+                                if Current_Price < Limit_Price:
+                                
+                                    self.StopMarketOrder(self.symbol, -1000, True)
+            
+            
+                #long?
+                if Previous_Close > Previous_Open:
+                    
+                    if Current_Close < Current_Open:
+                       
+                        if (Previous_Close - Previous_Open) > ((Current_Open - Current_Close) * 1.5):
+                           
+                            if (Current_Open - Current_Close) > 0.25:
+                               
+                                if Current_Price > Limit_Price:
+                                
+                                    self.StopMarketOrder(self.symbol, 1000, StopLoss)
