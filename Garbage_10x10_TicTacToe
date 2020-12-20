@@ -1,0 +1,213 @@
+#@title Tic Tac Toe
+import numpy as np
+
+import os
+
+
+GameRunning = True
+
+RoundNum = 0
+
+#red team cords
+X = np.array([
+             [0,0,0,0,0,0,0,0,0,0],
+             [0,0,0,0,0,0,0,0,0,0],
+             [0,0,0,0,0,0,0,0,0,0],
+             [0,0,0,0,0,0,0,0,0,0],
+             [0,0,0,0,0,0,0,0,0,0],
+             [0,0,0,0,0,0,0,0,0,0],
+             [0,0,0,0,0,0,0,0,0,0],
+             [0,0,0,0,0,0,0,0,0,0],
+             [0,0,0,0,0,0,0,0,0,0],
+             [0,0,0,0,0,0,0,0,0,0]
+             ])
+
+#blue team cords
+O = np.array([
+             [0,0,0,0,0,0,0,0,0,0],
+             [0,0,0,0,0,0,0,0,0,0],
+             [0,0,0,0,0,0,0,0,0,0],
+             [0,0,0,0,0,0,0,0,0,0],
+             [0,0,0,0,0,0,0,0,0,0],
+             [0,0,0,0,0,0,0,0,0,0],
+             [0,0,0,0,0,0,0,0,0,0],
+             [0,0,0,0,0,0,0,0,0,0],
+             [0,0,0,0,0,0,0,0,0,0],
+             [0,0,0,0,0,0,0,0,0,0]
+             ])
+
+
+class Game:
+
+  def Xarr(X,a,y,x):
+    
+    NewX = np.array([])
+
+    for i in range(y):
+
+      NewX = np.append(NewX, X[i])
+
+    NewX = np.append(NewX, a)
+    NewX = np.delete(NewX, x)
+    
+    #print("X with a=", NewX)
+    NewX = np.reshape(NewX, ((y + 1), 10))
+    #print("X with a=", NewX)
+
+    b = 9 - (y)
+
+    for i in range(b):
+
+      NewX = np.append(NewX, X[(i + y)])
+
+    NewX = np.reshape(NewX, (10, 10))
+    return NewX
+    
+
+  def Oarr(O,a,y,x):
+
+    NewO = np.array([])
+
+    for i in range(y):
+
+      NewO = np.append(NewO, O[i])
+
+    NewO = np.append(NewO, a)
+    NewO = np.delete(NewO, x)
+    
+    #print("X with a=", NewO)
+    NewO = np.reshape(NewO, ((y + 1), 10))
+    #print("X with a=", NewX)
+
+    b = 9 - (y)
+
+    for i in range(b):
+
+      NewO = np.append(NewO, O[(i + y)])
+
+    NewO = np.reshape(NewO, (10, 10))
+    return NewO
+
+  def Horzontal():
+    print("   ", end= "")
+    for i in range(4):
+
+      print("---+---+", end= "")
+
+    print("---+---")
+
+
+  def Vertical(X,O):
+    for i in range(9):
+    
+      if X[i] == 1:
+        a = " X"
+
+      elif O[i] == 1:
+        a = " O"
+
+      else:
+        a = "  "
+
+      print(a, "|", end= "")
+    print("")
+
+
+  def Run():
+    #print(X[0][0])
+
+    print("1  ", end= "")
+    Game.Vertical(X[0],O[0])
+    for i in range(9):
+
+      a = i
+        
+      Game.Horzontal()
+      
+      if (a + 2) == 10:
+        print((a + 2), "", end= "")
+      else:
+        print((a + 2), " ", end= "")
+
+      Game.Vertical(X[a],O[a])
+    print("")
+    print("    1   2   3   4   5   6   7   8   9   10")
+
+
+  def NextRound():  
+
+    global RoundNum
+    global X
+    global O
+
+
+
+    print("____________________________________________")
+    print("____________________________________________")
+
+    print(" ")
+
+    RoundNum = RoundNum + 1
+
+    print("Round: ", + RoundNum)
+
+    if (RoundNum % 2) == 0:
+      print("O turn".format(RoundNum))
+
+      print(" ")
+    
+      print("Select x value:")
+      y = int(input()) - 2
+
+      print("Select y value:")
+      x = int(input())
+
+      if x > 10 or y > 10:
+        print("Round Forfeited: please return a value under 10")    
+
+      else:
+
+        a = O[y]
+
+        #print("a=",a)
+
+        a = np.insert(a, x,1)
+
+        #print("y=",y)
+
+        O = Game.Oarr(O,a,y,x)
+
+    else:
+      print("X turn".format(RoundNum))
+
+      print(" ")
+    
+      print("Select x value:")
+      y = int(input()) - 2
+
+      print("Select y value:")
+      x = int(input())
+
+      if x > 10 or y > 10:
+        print("Round Forfeited: please return a value under 10")
+
+      else:
+
+        a = X[y]
+
+        #print("a=",a)
+
+        a = np.insert(a, x,1)
+
+        #print("y=",y)
+
+        X = Game.Xarr(X,a,y,x)
+
+
+while GameRunning == True:
+  Game.Run()
+  Game.NextRound()
+
+  #os.system('cls' if os.name == 'nt' else "printf '\033c'")
+  
+  print()
