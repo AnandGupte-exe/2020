@@ -1,0 +1,104 @@
+from google.colab import files
+import io
+import matplotlib.pyplot as plt
+
+
+data = files.upload()
+
+df = pd.read_csv(io.StringIO(data['StockData.csv'].decode('utf-8'))).tail(100)
+
+df = df.drop(columns='Running')
+
+print("RSI:")
+plt.plot(df['RSI'])
+plt.show()
+
+print("MACD:")
+plt.plot(df['MACD'])
+plt.show()
+
+print("SMA_5:")
+plt.plot(df['SMA_5'])
+plt.show()
+
+print("SMA_10:")
+plt.plot(df['SMA_10'])
+plt.show()
+
+print("SMA_50:")
+plt.plot(df['SMA_50'])
+plt.show()
+
+print("SMA_100:")
+plt.plot(df['SMA_100'])
+plt.show()
+
+print("BB_lower:")
+plt.plot(df['BB_lower'])
+plt.show()
+
+print("BB_upper:")
+plt.plot(df['BB_upper'])
+plt.show()
+
+print("Open:")
+plt.plot(df['Open'])
+plt.show()
+
+print("Close:")
+plt.plot(df['Close'])
+plt.show()
+
+print("Volume:")
+plt.plot(df['Volume'])
+plt.show()
+
+print("Action:")
+plt.plot(df['Action'])
+plt.show()
+
+
+import pandas as pd
+import numpy as np
+import sklearn
+from sklearn.utils import shuffle
+from sklearn.neighbors import  KNeighborsClassifier
+from sklearn import linear_model, preprocessing
+
+data = df
+
+X = list(zip(data['RSI'], 
+             data['MACD'], 
+             data['SMA_5'], 
+             data['SMA_10'], 
+             data['SMA_50'], 
+             data['SMA_100'], 
+             data['BB_lower'], 
+             data['BB_upper'], 
+             data['Open'], 
+             data['Close'], 
+             data['Volume']))
+
+y = list(zip(data['Action']))
+
+x_train, x_test, y_train, y_test = sklearn.model_selection.train_test_split(X, y, test_size = .5)
+
+print(x_train)
+
+
+model = KNeighborsClassifier(n_neighbors=23)
+
+model.fit(x_train, y_train)
+acc = model.score(x_test, y_test)
+print(acc)
+
+
+
+predicted = model.predict(x_test)
+names = ["unacc", "acc", "good", "vgood"]
+
+for x in range(len(x_test)):
+    print("predicted: ", predicted[x], " data: ", x_test[x], " Actual: ", y_test[x])
+
+
+print(predicted)
