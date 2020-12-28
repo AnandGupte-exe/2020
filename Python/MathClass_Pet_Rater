@@ -1,22 +1,37 @@
-#@title PetPicker2000
+#@markdown # PetPicker2000
+
 
 import numpy as np
 import math as math
+from IPython.display import HTML, display
 import time as t
+import ipywidgets as widgets
 
 
-Init_data = [[1500, 120, 13, 3, 75, 50, 60, 1000],
-             [900, 60, 16, 2, 50, 25, 35, 500],
-             [25, 15, 10, 0, 5, 0.5, 2, 5],
-             [30, 15, 15, 1, 20, 0.2, 7, 1.5],
-             [100, 5, 25, 0, 10, 20, 3, 2.5],
-             [20, 10, 3, 2, 10, 0.4, 7, 2],
-             [225, 20, 6, 2, 40, 2, 9, 7.5],
-             [400, 60, 6.5, 3, 50, 6.5, 16, 15],
-             [220, 45, 2, 2, 50, 0.75, 10, 4],
-             [130, 30, 17.5, 3, 20, 0.7, 10, 2],
-             [250, 60, 15, 0, 5, 0.06, 3, 2],
-             [50, 22.5, 75, 2, 35, 15, 7, 4]
+Init_data = [[1500, 120,  13,   3, 75, 50,   60, 1000],
+             
+             [900,  60,   16,   2, 50, 25,   35, 500],
+
+             [25,   15,   10,   0, 5,  0.5,  2,  5],
+
+             [30,   15,   15,   1, 20, 0.2,  7,  1.5],
+
+             [100,  5,    25,   0, 10, 20,   3,  2.5],
+
+             [20,   10,   3,    2, 10, 0.4,  7,  2],
+
+             [225,  20,   6,    2, 40, 2,    9,  7.5],
+
+             [400,  60,   6.5,  3, 50, 6.5,  16, 15],
+
+             [220,  45,   2,    2, 50, 0.75, 10, 4],
+
+             [130,  30,   17.5, 3, 20, 0.7,  10, 2],
+
+             [250,  60,   15,   0, 5,  0.06, 3,  2],
+
+             [50,   22.5, 75,   2, 35, 15,   7,  4]
+             
             ]
 
 
@@ -25,29 +40,39 @@ def get_user_data():
 
     output = []
 
-    print("1)What is your ideal pets inital cost?")
-    output.append(float(input()))
+    widgets.FloatSlider()
 
-    print("2)How much time per day do you want to spend maintaning the pet?")
-    output.append(float(input()))
+    #@markdown #### 1)What is your ideal pets inital cost?
+    Q1 = 512 #@param {type:"slider", min:0, max:1500, step:1}
+    output.append(Q1)
 
-    print("3)What is your ideal pets lifespan?")
-    output.append(float(input()))
+    #@markdown #### 2)How much time per day do you want to spend maintaning the pet?
+    Q2 = 50 #@param {type:"slider", min:0, max:120, step:1}
+    output.append(Q2)
 
-    print("4)How trainable do you want your pet to be? (0 = not trainable, 1 = hard, 2 = medium, 3 = easy)")
-    output.append(float(input()))
+    #@markdown #### 3)What is your ideal pets lifespan?
+    Q3 = 29 #@param {type:"slider", min:0, max:75, step:1}
+    output.append(Q3)
 
-    print("5)What is your ideal pets monthly cost?")
-    output.append(float(input()))
+    #@markdown #### 4)How trainable do you want your pet to be? (0 = not trainable, 1 = hard, 2 = medium, 3 = easy)
+    Q4= 1 #@param {type:"slider", min:0, max:3, step:1}
+    output.append(Q4)
 
-    print("6)What is your ideal pets weight?")
-    output.append(float(input()))
+    #@markdown #### 5)What is your ideal pets monthly cost?
+    Q5 = 49 #@param {type:"slider", min:0, max:75  , step:1}
+    output.append(Q5)
 
-    print("7)What is your ideal pets lenght")
-    output.append(float(input()))
+    #@markdown #### 6)What is your ideal pets weight?
+    Q6 = 24.7 #@param {type:"slider", min:0, max:50, step:0.1}
+    output.append(Q6)
 
-    print("8)How much space will your pet have accses to? (square feet)")
-    output.append(float(input()))
+    #@markdown #### 7)What is your ideal pets length?
+    Q7 = 24.8 #@param {type:"slider", min:0, max:60, step:0.1}
+    output.append(Q7)
+
+    #@markdown #### 8)What is the max space will your pet have accses to? (square feet)
+    Q8 = 599 #@param {type:"slider", min:0, max:1000, step:1}
+    output.append(Q8)
 
     return output
 
@@ -94,9 +119,26 @@ def scale__user__Data(x, y):
 
 def find_Score(x,y):
 
+    y = y.tolist()
+
+    SpaceLst = []
+    OutputSpaceLst = []
+
+    spaceX = x[len(x) - 1]
+
+    x.pop(len(x) - 1)
+
+
+    for i in range(len(y)):
+
+        SpaceLst.append(y[i][len(x)])
+
+        y[i].pop(len(x))
+
 
     local_output = []
     total_output = []
+
 
     for a in range(len(y)):
 
@@ -108,8 +150,22 @@ def find_Score(x,y):
 
         local_output.append(buffer)
 
-    for a in range(len(local_output)):
-        total_output.append(sum(local_output[a]))
+
+    for i in range(len(y)):
+
+        if SpaceLst[i] < spaceX:
+            OutputSpaceLst.append(0)
+
+        else:
+            OutputSpaceLst.append(SpaceLst[i] - spaceX)
+
+
+    for i in range(len(OutputSpaceLst)):
+
+        local_output[i].append(OutputSpaceLst[i])
+
+    for i in range(len(local_output)):
+        total_output.append(sum(local_output[i]))
 
     return total_output
 
@@ -141,7 +197,6 @@ def findPet(x):
 
 user_data = get_user_data()
 
-print(user_data)
 
 t.sleep(0.3)
 
@@ -151,25 +206,45 @@ Scaled_User_data = scale__user__Data( scale__inti__Data(Init_data)[1], user_data
 
 Score = find_Score(Scaled_User_data, Scaled_Init_data)
 
-print(Scaled_Init_data)
+def progress(value, max=100):
 
-t.sleep(0.2)
+    return HTML("""
+        
+        <progress
+            value='{value}'
+            max='{max}',
+            style='width: 100%'
+        >
 
-print(Scaled_User_data)
+            {value}
+        </progress>
 
-t.sleep(0.2)
+    """.format(value=value, max=max))
 
-print(Score)
+out = display(progress(0, 100), display_id=True)
 
-t.sleep(0.4)
+for ii in range(101):
+
+    t.sleep(0.02)
+    out.update(progress(ii, 100))
 
 Final_Pet = findPet(Score)
 
-print("-------------------------------------------------")
-print("-------------------------------------------------")
-print("-------------------------------------------------")
+
 print("The best pet for you is:")
 
-t.sleep(0.3)
+
+def increase_font():
+  from IPython.display import Javascript
+  display(Javascript('''
+  for (rule of document.styleSheets[0].cssRules){
+    if (rule.selectorText=='body') {
+      rule.style.fontSize = '30px'
+      break
+    }
+  }
+  '''))
+
+increase_font()
 
 print(Final_Pet)
